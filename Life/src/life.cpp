@@ -10,15 +10,23 @@
 #include <string>
 #include "console.h"
 #include "filelib.h"
+#include "strlib.h"
 #include "grid.h"
 #include "gwindow.h"
 #include "simpio.h"
 #include "lifegui.h"
+
 using namespace std;
 
 int main() {
     // TODO: Finish the program!
+    ifstream stream;
+    string line;
 
+    string filename = promptUserForFile(stream, "Grid file input?");
+    getline(stream, line);
+
+    cout << line << endl;
 
     cout << "Have a nice Life!" << endl;
     return 0;
