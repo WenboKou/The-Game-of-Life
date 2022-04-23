@@ -28,7 +28,6 @@ void printGrid(Grid<char>& matrix){
 }
 
 int detectSurround(Grid<char>& matrix, int r, int c, int row, int column) {
-    // situation 1: A location that has zero or one neighbors will be empty in the next generation. If a cell was there, it dies.
     int numX = 0;
     if(c-1 > 0) {
         if(matrix[r][c-1] == 'X') {
@@ -74,13 +73,51 @@ int detectSurround(Grid<char>& matrix, int r, int c, int row, int column) {
     return numX;
 }
 
-Grid<char> generation(Grid<char>& matrix, int row, int column) {
+
+int wrapping_detectSurround(Grid<char>& matrix, int r, int c, int row, int column) {
+    int numX = 0;
+    int r_up = (r - 1 + row) % row;
+    int r_down = (r + 1 + row) % row;
+    int c_left = (c - 1 + column) % column;
+    int c_right = (c + 1 + column) % column;
+    if (matrix[r_up][c_left] == 'X') {
+        numX++;
+    }
+    if (matrix[r_up][c] == 'X') {
+        numX++;
+    }
+    if (matrix[r_up][c_right] == 'X') {
+        numX++;
+    }
+    if (matrix[r][c_left] == 'X') {
+        numX++;
+    }
+    if (matrix[r][c_right] == 'X') {
+        numX++;
+    }
+    if (matrix[r_down][c_left] == 'X') {
+        numX++;
+    }
+    if (matrix[r_down][c] == 'X') {
+        numX++;
+    }
+    if (matrix[r_down][c_right] == 'X') {
+        numX++;
+    }
+    return numX;
+}
+
+
+Grid<char> generation(Grid<char>& matrix, int row, int column, string if_wrap) {
     int neighbors;
     Grid<char> newmatrix(row, column);
     for (int r = 0; r < matrix.numRows(); r++) {
         for (int c = 0; c < matrix.numCols(); c++) {
-            neighbors = detectSurround(matrix, r, c, row, column);
-            //cout << "r, c, neighbors: " << r << c << neighbors << endl;
+            if (if_wrap == "n") {
+                neighbors = detectSurround(matrix, r, c, row, column);
+            } else {
+                neighbors = wrapping_detectSurround(matrix, r, c, row, column);
+            }
             if (neighbors <= 1) {
                 newmatrix[r][c] = '-';
             } else if (neighbors == 3) {
@@ -100,6 +137,7 @@ int main() {
     ifstream stream;
     string line;
     string mode;
+    string if_wrap;
     string frames;
     int c;
 
@@ -120,6 +158,14 @@ int main() {
         }
     }
     stream.close();
+
+   while (1) {
+        if_wrap = getLine("Should the simulation wrap around the grid (y/n)?");
+        if_wrap = toLowerCase(if_wrap);
+        if (if_wrap == "y" || if_wrap == "n") {
+            break;
+        }
+   }
     printGrid(matrix);
     while (1) {
         mode = getLine("a)nimate, t)ick, q)uit?");
@@ -128,14 +174,14 @@ int main() {
            frames = getLine("How many frames?");
            for (int i = 0; i < stringToInteger(frames); i++) {
                // one generation
-               matrix = generation(matrix, row, column);
+               matrix = generation(matrix, row, column, if_wrap);
                clearConsole();
                printGrid(matrix);
                pause(50);
            }
         } else if (mode == "t") {
             // one generation
-            matrix = generation(matrix, row, column);
+            matrix = generation(matrix, row, column, if_wrap);
             printGrid(matrix);
         } else if (mode == "q") {
             // quit the game
